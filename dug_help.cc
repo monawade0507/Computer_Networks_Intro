@@ -108,7 +108,6 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	  { queryTypeNum = 1;  }
 
-  std::cout << "HEHEHEHEHEH" << std::endl;
 	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf;
 	dnsQuestion->qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
@@ -176,27 +175,14 @@ void DugHelp::makeConnection () {
 }
 
 void DugHelp::sendPacket () {
-	// find the size to allocate for the message buffer
-	int size = sizeof(struct DNS_Header);
-	size += sizeof(struct DNS_Question);
-	char *message[size];
-	int totalSize = 0;
 
-	std::memcpy(message, (struct DNS_Header*)&dnsHeader, sizeof(struct DNS_Header));
-	totalSize = sizeof(struct DNS_Header);
-
-	std::memcpy(message + totalSize, (struct DNS_Question*)&dnsQuestion, sizeof(struct DNS_Question));
-	totalSize += sizeof(packetQuestion);
-
-	int bytesSent = 0;
-	if ((bytesSent = write(sock, message, totalSize)) < 0) {
-		logger->printLog ("write Failed");
-		std::string error = strerror(errno);
-		logger->printLog(error);
+	if (sendto(sock, (char*)buf, sizeof(struct DNS_Header) + sizeof(struct DNS_Question), 0, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
+		logger->printLog ("sendto Failed");
+		std::string message = strerror(errno);
+		logger->printLog(message);
+		exit(-1);
 	}
-	else {
-		logger->printLog ("write was successful");
-	}
+	logger->printLog ("sendTo was successful");
 }
 
 int DugHelp::getPacket () {

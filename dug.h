@@ -11,12 +11,6 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-
-// *****************************************************
-// Libraries include to help create the DNS Responce 
-// *****************************************************
-//#include "dug_help.h"
-#include "socket.h"
+#include "dug_help.h"
 
 #define ENDL  " (" << __FILE__ << ":" << __LINE__ << ")"
-

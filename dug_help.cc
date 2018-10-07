@@ -30,19 +30,20 @@ void DugHelp::setQueryType (std::string type) {
 
 void DugHelp::createQueryHeader () {
 	// create Query Header with struct
-	packetHeader.id = (unsigned short) htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
-	packetHeader.flags.rd = 0;			// 1-bit
-	packetHeader.flags.tc = 0;			// 1-bit
-	packetHeader.flags.aa = 0;			// 1-bit
-	packetHeader.flags.opcode = htons(0); 		// 4-bit; standard query = 0; not the QType
-	packetHeader.flags.qr = 0;			// 1-bit; sending a query = 0; recieving a response = 1
-	packetHeader.flags.rcode = htons(0);		// 4-bit
-	packetHeader.flags.z = htons(0);		// 1-bit; must set to 0
-	packetHeader.flags.ra = 0;			// 1-bit
-	packetHeader.gdcount = htons(1); 		// 16-bit; specifies the # of entries in the question section
-	packetHeader.ancount = htons(0);		// 16-bit; specifies the # of resource records in the answer section
-	packetHeader.nscount = htons(0);		// 16-bit; specifies the # of name server resource records in the authority records section
-	packetHeader.arcount = htons(0);		// 16-bit; specifies the # of resource records in the additional records section
+	dnsHeader = (struct DNS_Header *)&buf;
+	dnsHeader->id = (unsigned short) htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
+	dnsHeader->flags.rd = 0;			// 1-bit
+	dnsHeader->flags.tc = 0;			// 1-bit
+	dnsHeader->flags.aa = 0;			// 1-bit
+	dnsHeader->flags.opcode = htons(0); 		// 4-bit; standard query = 0; not the QType
+	dnsHeader->flags.qr = 0;			// 1-bit; sending a query = 0; recieving a response = 1
+	dnsHeader->flags.rcode = htons(0);		// 4-bit
+	dnsHeader->flags.z = htons(0);		// 1-bit; must set to 0
+	dnsHeader->flags.ra = 0;			// 1-bit
+	dnsHeader->gdcount = htons(1); 		// 16-bit; specifies the # of entries in the question section
+	dnsHeader->ancount = htons(0);		// 16-bit; specifies the # of resource records in the answer section
+	dnsHeader->nscount = htons(0);		// 16-bit; specifies the # of name server resource records in the authority records section
+	dnsHeader->arcount = htons(0);		// 16-bit; specifies the # of resource records in the additional records section
 
 }
 
@@ -82,12 +83,15 @@ void DugHelp::stringToHex () {
 
 	std::cout << "The hex representation of qname TOTAL: " << qname_labelFormat << std::endl;
 
-	packetQuestion.name = {0};
-	packetQuestion.name = (unsigned char*)qname_labelFormat.c_str();
+	dnsQuestion->name = (unsigned char*)&buf[sizeof(struct DNS_Header)];
+	dnsQuestion->name = (unsigned char*)qname_labelFormat.c_str();
 }
 
 void DugHelp::createQueryQuestion () {
 	stringToHex();
+
+	dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
+
 	int queryTypeNum = 0;
 
 	if (queryType == "A")     { queryTypeNum = 1;  }
@@ -173,10 +177,10 @@ void DugHelp::sendPacket () {
 	char *message[size];
 	int totalSize = 0;
 
-	std::memcpy(message, (struct DNS_Header*)&packetHeader, sizeof(packetHeader));
+	std::memcpy(message, (struct DNS_Header*)&dnsHeader, sizeof(struct DNS_Header));
 	totalSize = sizeof(struct DNS_Header);
 
-	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion, sizeof(packetQuestion));
+	std::memcpy(message + totalSize, (struct DNS_Question*)&dnsQuestion, sizeof(struct DNS_Question));
 	totalSize += sizeof(packetQuestion);
 
 	int bytesSent = 0;

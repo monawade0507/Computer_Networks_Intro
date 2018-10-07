@@ -87,6 +87,9 @@ class DugHelp {
 		DNS_Header packetHeader;
 		DNS_Question packetQuestion;
 		DNS_Answer packetAnswer;
+
+		struct DNS_Header *dnsHeader = NULL;
+		struct DNS_Question *dnsQuestion = NULL;
 		/***************************************************************************
 		UDP Socket required struct
 		struct sockaddr_in

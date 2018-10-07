@@ -49,7 +49,6 @@ class DugHelp {
 		struct DNS Question
 		*/
 		struct DNS_Question {
-			unsigned char *qname;
 			uint16_t qtype;
 			uint16_t qclass;
 		};

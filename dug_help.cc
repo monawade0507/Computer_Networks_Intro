@@ -87,15 +87,6 @@ void DugHelp::createQueryQuestion () {
 	stringToHex();
 	int queryTypeNum = 0;
 
-	// create the struct with query question information
-	//unsigned char* temp = new unsigned char[qname_labelFormat.length() + 1];
-	//strcpy(temp, reinterpret_cast<unsigned char*>(qname_labelFormat));
-	int size = qname_labelFormat.length() + 1;
-	unsigned char* temp = {0};
-	temp = (unsigned char*)qname_labelFormat.c_str();
-
-	packetQuestion.qname = temp;
-
 	if (queryType == "A")     { queryTypeNum = 1;  }
 	if (queryType == "NS")    { queryTypeNum = 2;  }
 	if (queryType == "CNAME") { queryTypeNum = 5;  }
@@ -178,14 +169,19 @@ void DugHelp::sendPacket () {
 	size += sizeof(struct DNS_Question);
 	char *message [size];
 	int totalSize = 0;
+	int stringSize = qname_labelFormat.length() + 1;
+	char* temp = {0};
+	temp = (char*)qname_labelFormat.c_str();
+
 	std::memcpy(message, (struct DNS_Header*)&packetHeader, sizeof(packetHeader));
 	totalSize = sizeof(struct DNS_Header);
-	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion.qname, sizeof(packetQuestion.qname));
-	totalSize += sizeof(packetQuestion.qname);
-	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion.qtype, sizeof(packetQuestion.qtype));
-	totalSize += sizeof(packetQuestion.qtype);
-	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion.qclass, sizeof(packetQuestion.qclass));
-	totalSize += sizeof(packetQuestion.qclass);
+
+	std::memcpy(message + totalSize, (char*)temp, sizeof(qname_labelFormat));
+	totalSize += sizeof(qname_labelFormat);
+
+	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion, sizeof(packetQuestion));
+	totalSize += sizeof(packetQuestion);
+
 	int bytesSent = 0;
 	if ((bytesSent = write(sock, message, totalSize)) < 0) {
 		logger->printLog ("write Failed");

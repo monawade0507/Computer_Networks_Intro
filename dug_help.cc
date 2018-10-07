@@ -84,12 +84,15 @@ void DugHelp::stringToHex () {
 	std::cout << "The hex representation of qname TOTAL: " << qname_labelFormat << std::endl;
 
 	dnsQuestion->name = (unsigned char*)&buf[sizeof(struct DNS_Header)];
+	dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));
 	dnsQuestion->name = (unsigned char*)qname_labelFormat.c_str();
+
+
 }
 
 void DugHelp::createQueryQuestion () {
+	dnsQuestion = (struct DNS_Question *)&buf;
 	stringToHex();
-
 	dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
 
 	int queryTypeNum = 0;
@@ -105,9 +108,11 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	  { queryTypeNum = 1;  }
 
-	packetQuestion.qdata->qtype = htons(queryTypeNum);
+  std::cout << "HEHEHEHEHEH" << std::endl;
+	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf;
+	dnsQuestion->qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
-	packetQuestion.qdata->qclass = htons(1);
+	dnsQuestion->qdata->qclass = htons(1);
 }
 
 void DugHelp::readReceivedBuffer (unsigned char* buffer) {

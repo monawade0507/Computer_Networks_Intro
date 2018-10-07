@@ -6,14 +6,13 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <vector>
 
 class DugHelp {
 	private:
-		std::string hostname;
-		std::string IPaddress;
 		// Use htons() and ntohs() to convert multi-byte integers to the correct ordering
 		// If there is any doubt, use bitmasks instead
-		struct dns_header {
+		struct DNS_Header {
 			uint16_t id;
 			struct {
 				uint8_t rd: 1;		// recursion desired
@@ -24,7 +23,7 @@ class DugHelp {
 				// 3 - 15 reserved for futre use
 				uint8_t qr: 1;		// query(0) or response (1)
 
-				uint8_t rcode 4;	// response code
+				uint8_t rcode: 4;	// response code
 				// 0: No error condition; 1:Format error; 2:Server failure; 3: Name Error (authoritative server, name doesn't exist)
 				// 4: Not implemented; 5: Refused
 				uint8_t z: 3;		// reserved for future use. Must be zero
@@ -35,6 +34,20 @@ class DugHelp {
 			uint16_t nscount;
 			uint16_t arcount;
 		};
+		struct DNS_Question {
+			std::string qname;
+			uint16_t qtype;
+			uint16_t qclass;
+		};
+
+
+
+		std::string hostname;
+		std::string IPaddress;
+		std::string queryType = "";
+		std::string qname_labelFormat;
+		DNS_Header packetHeader;
+		DNS_Question packetQuestion;
 
 	public:
 		DugHelp();
@@ -42,5 +55,8 @@ class DugHelp {
 		void setIPaddress(std::string addr);
 		std::string getHostName();
 		std::string getIPaddress();
+		void setQueryType (std::string type);
 		void createQueryHeader ();
+		void stringToHex();					// converting the hostname to qname (length/data pair)
+		void createQueryQuestion ();
 };

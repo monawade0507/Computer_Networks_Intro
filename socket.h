@@ -15,6 +15,7 @@
 #include <string.h>
 #include <cstring>
 #include "log.h"
+#include "dug_help.h"
 
 #define ENDL " (" << __FILE__ << ":" << __LINE__ << ")"
 
@@ -29,6 +30,7 @@ class ClientConnection {
 
 		// UDP Socket Connection functions
 		void makeConnection();
+		void sendPacket();
 
 	private:
 		int sock = -1;						// file descriptor for the server

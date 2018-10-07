@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
 	client.setupAddress(dug_helper.getIPaddress());
 	// call connect
 	client.makeConnection();
-
+	// sending packet query
+	client.sendPacket();
 
 	return 0;
 }

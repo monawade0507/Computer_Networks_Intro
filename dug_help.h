@@ -62,6 +62,9 @@ class DugHelp {
 		void stringToHex();					// converting the hostname to qname (length/data pair)
 		void createQueryQuestion();				
 		void createQueryMessage();				// Message = Header + Question
+		DNS_Header returnDNSHeader() { return packetHeader; }
+		DNS_Question returnDNSQuestion() { return packetQuestion; }
+
 };
 
 

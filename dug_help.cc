@@ -89,7 +89,12 @@ void DugHelp::createQueryQuestion () {
 	int queryTypeNum = 0;
 
 	// create the struct with query question information
-	//packetQuestion.qname = qname_labelFormat;
+	//unsigned char* temp = new unsigned char[qname_labelFormat.length() + 1];
+	//strcpy(temp, reinterpret_cast<unsigned char*>(qname_labelFormat));
+	int size = qname_labelFormat.length() + 1;
+	unsigned char* temp = {0};
+	temp = (unsigned char*)qname_labelFormat.c_str();
+	packetQuestion.qname = temp;
 
 	if (queryType == "A")     { queryTypeNum = 1;  }
 	if (queryType == "NS")    { queryTypeNum = 2;  }

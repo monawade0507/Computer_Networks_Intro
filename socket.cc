@@ -18,9 +18,9 @@ void ClientConnection::createSocket ()
 void ClientConnection::setupAddress (std::string ip)
 {
 	// define the struct
-	srand(time(NULL));
-	portNum = (rand() % 10000 + 1024);
-	//portNum = 53; 				// DNS is setup over port 53
+	//srand(time(NULL));
+	//portNum = (rand() % 10000 + 1024);
+	portNum = 53; 				// DNS is setup over port 53
 
 	// zero the whole struct
 	bzero((char *)&servAddr, sizeof(servAddr));
@@ -38,6 +38,14 @@ void ClientConnection::setupAddress (std::string ip)
 	logger->printLog("Address has been created for socket");
 }
 
+
+
+
+// **************************************************************************************
+// **************************************************************************************
+// From Project 1 
+// **************************************************************************************
+// **************************************************************************************
 void ClientConnection::bindSocket ()
 {
 	int bindSuccess = 0;
@@ -154,11 +162,28 @@ int ClientConnection::processConnection(int connection)
 	return -1;
 }
 
+// *************************************************************************************
+// *************************************************************************************
+// End of Project 1
+// *************************************************************************************
+// *************************************************************************************
+
 void ClientConnection::makeConnection () {
 	if (connect(sock, (const sockaddr*) &servAddr, sizeof(servAddr))) {
 		logger->printLog ("Connect Failed");
 		std::string message = strerror(errno);
-		logger->printLog (message);
+		logger->printLog(message);
 	}
 	logger->printLog ("Connection was made");	
-}	
+}
+
+void ClientConnection::sendPacket () {
+	DugHelp dughelp;
+	unsigned char buf[65536];
+	if(sendto(sock,(char*)buf, sizeof(dughelp.returnDNSHeader()) + sizeof(dughelp.returnDNSQuestion()), 0, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
+		logger->printLog ("sendto Failed");
+		std::string message = strerror(errno);
+		logger->printLog(message);
+	}
+	logger->printLog("sendto was successful");
+}

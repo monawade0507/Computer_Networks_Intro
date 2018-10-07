@@ -21,11 +21,15 @@
 class ClientConnection {
 	public:
 		void createSocket();
-		void setupAddress();
+		void setupAddress(std::string ip);
 		void bindSocket();
 		void listenSocket();
 		int  waitingConnection();
 		int  processConnection(int connection);
+
+		// UDP Socket Connection functions
+		void makeConnection();
+
 	private:
 		int sock = -1;						// file descriptor for the server
 		int lst  = -1;						// file descriptor for the listener

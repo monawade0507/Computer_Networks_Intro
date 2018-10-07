@@ -37,7 +37,7 @@ class DugHelp {
 			uint16_t arcount;
 		};
 		struct DNS_Question {
-			std::string qname;
+			unsigned char *qname;
 			uint16_t qtype;
 			uint16_t qclass;
 		};
@@ -57,10 +57,11 @@ class DugHelp {
 		void setIPaddress(std::string addr);
 		std::string getHostName();
 		std::string getIPaddress();
-		void setQueryType (std::string type);
-		void createQueryHeader ();
+		void setQueryType(std::string type);
+		void createQueryHeader();
 		void stringToHex();					// converting the hostname to qname (length/data pair)
-		void createQueryQuestion ();
+		void createQueryQuestion();				
+		void createQueryMessage();				// Message = Header + Question
 };
 
 

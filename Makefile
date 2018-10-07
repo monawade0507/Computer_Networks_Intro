@@ -13,10 +13,10 @@ LDFLAGS = -g -pthread
 #
 LIBRARYS = -lpthread
 
-dug: dug.o  dug_help.o log.o socket.o
-	${LD} ${LDFLAGS} dug.o dug_help.o -o $@ ${LIBRARYS}
+dug: dug.o dug_help.o log.o socket.o
+	${LD} ${LDFLAGS} dug.o dug_help.o log.o socket.o -o $@ ${LIBRARYS}
 
-dug.o : dug.cc dug_help.cc 
+dug.o : dug.cc dug.h 
 	${CXX} -c ${CXXFLAGS} -o $@ $<
 
 dug_help.o : dug_help.cc dug_help.h

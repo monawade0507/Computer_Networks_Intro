@@ -3,7 +3,7 @@
 void ClientConnection::createSocket () 
 {
 	logger->setLogger(true);
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+	if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0) 
 	{
 		logger->printLog ("Error opening socket");
 		exit (-1);
@@ -15,19 +15,26 @@ void ClientConnection::createSocket ()
 	}
 }
 
-void ClientConnection::setupAddress ()
+void ClientConnection::setupAddress (std::string ip)
 {
 	// define the struct
 	srand(time(NULL));
 	portNum = (rand() % 10000 + 1024);
-	
+	//portNum = 53; 				// DNS is setup over port 53
+
 	// zero the whole struct
 	bzero((char *)&servAddr, sizeof(servAddr));
 
 	// Fill in the struct with the information need for the address of the host
-	servAddr.family = AF_INET;	
-	servAddr.sin_addr.s_addr = INADDR_ANY;
+	servAddr.family = PF_INET;	
+	char* temp = new char[ip.length() + 1];
+	strcpy(temp, ip.c_str());
+	servAddr.sin_addr.s_addr = inet_addr(temp);
 	servAddr.port = htons(portNum);
+	if (!inet_aton(temp, &servAddr.sin_addr)) {
+		logger->printLog( "inet_aton failded");
+		exit(-1);
+	}
 	logger->printLog("Address has been created for socket");
 }
 
@@ -146,3 +153,12 @@ int ClientConnection::processConnection(int connection)
 	// sucessful calls for read() and write(); no keywords detected
 	return -1;
 }
+
+void ClientConnection::makeConnection () {
+	if (connect(sock, (const sockaddr*) &servAddr, sizeof(servAddr))) {
+		logger->printLog ("Connect Failed");
+		std::string message = strerror(errno);
+		logger->printLog (message);
+	}
+	logger->printLog ("Connection was made");	
+}	

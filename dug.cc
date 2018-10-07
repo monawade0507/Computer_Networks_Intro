@@ -2,6 +2,8 @@
 
 int main(int argc, char *argv[]) {
 	DugHelp dug_helper;
+	ClientConnection client;
+
 	// Loop through each argument and set it equal to the variable you need
 	for (int count = 0; count < argc; count++) {
 		if (count == 1) { dug_helper.setHostName(argv[count]);}
@@ -19,7 +21,13 @@ int main(int argc, char *argv[]) {
 	dug_helper.createQueryHeader();
 	// create the Query Question
 	dug_helper.createQueryQuestion();
-	
+	// create the socket
+	client.createSocket();
+	// set up socket address
+	client.setupAddress(dug_helper.getIPaddress());
+	// call connect
+	client.makeConnection();
+
 
 	return 0;
 }

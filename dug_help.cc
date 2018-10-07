@@ -89,7 +89,7 @@ void DugHelp::createQueryQuestion () {
 	int queryTypeNum = 0;
 
 	// create the struct with query question information
-	packetQuestion.qname = qname_labelFormat;
+	//packetQuestion.qname = qname_labelFormat;
 
 	if (queryType == "A")     { queryTypeNum = 1;  }
 	if (queryType == "NS")    { queryTypeNum = 2;  }
@@ -105,4 +105,9 @@ void DugHelp::createQueryQuestion () {
 	packetQuestion.qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
 	packetQuestion.qclass = htons(1);
+}
+
+void DugHelp::createQueryMessage () {
+	// combine the header and question
+	
 }

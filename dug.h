@@ -16,6 +16,7 @@
 // Libraries include to help create the DNS Responce 
 // *****************************************************
 #include "dug_help.h"
+#include "socket.h"
 
 #define ENDL  " (" << __FILE__ << ":" << __LINE__ << ")"
 

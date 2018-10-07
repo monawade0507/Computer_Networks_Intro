@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <vector>
 
+#define ENDL " (" << __FILE__ << ":" << __LINE__ << ")"
+
 class DugHelp {
 	private:
 		// Use htons() and ntohs() to convert multi-byte integers to the correct ordering
@@ -60,3 +62,5 @@ class DugHelp {
 		void stringToHex();					// converting the hostname to qname (length/data pair)
 		void createQueryQuestion ();
 };
+
+

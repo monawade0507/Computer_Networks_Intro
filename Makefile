@@ -13,7 +13,7 @@ LDFLAGS = -g -pthread
 #
 LIBRARYS = -lpthread
 
-dug: dug.o  dug_help.o
+dug: dug.o  dug_help.o log.o socket.o
 	${LD} ${LDFLAGS} dug.o dug_help.o -o $@ ${LIBRARYS}
 
 dug.o : dug.cc dug_help.cc 
@@ -22,17 +22,23 @@ dug.o : dug.cc dug_help.cc
 dug_help.o : dug_help.cc dug_help.h
 	${CXX} -c ${CXXFLAGS} -o $@ $<
 
+log.o : log.cc log.h
+	${CXX} -c ${CXXFLAGS} -o $@ $<
+
+socket.o : socket.cc socket.h
+	${CXX} -c ${CXXFLAGS} -o $@ $< 	
+
 #
 # Please remember not to submit objects or binarys.
 #
 clean:
-	rm -f core dug.o dug_help.o
+	rm -f core dug.o dug_help.o log.o socket.o
 
 #
 # This might work to create the submission tarball in the formal I asked for.
 #
 submit:
-	rm -f core project2 dug.o dug_help.o
+	rm -f core project2 dug.o dug_help.o log.o socket.o
 	mkdir `whoami`
 	cp Makefile README.txt *.h *.cc `whoami`
 	tar cf `whoami`.tar `whoami`

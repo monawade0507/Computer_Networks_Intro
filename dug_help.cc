@@ -30,14 +30,14 @@ void DugHelp::setQueryType (std::string type) {
 
 void DugHelp::createQueryHeader () {
 	// create Query Header with struct
-	packetHeader.id = htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
+	packetHeader.id = (unsigned short) htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
 	packetHeader.flags.rd = 0;			// 1-bit
 	packetHeader.flags.tc = 0;			// 1-bit
 	packetHeader.flags.aa = 0;			// 1-bit
 	packetHeader.flags.opcode = htons(0); 		// 4-bit; standard query = 0; not the QType
 	packetHeader.flags.qr = 0;			// 1-bit; sending a query = 0; recieving a response = 1
 	packetHeader.flags.rcode = htons(0);		// 4-bit
-	packetHeader.flags.z = htons(0);		// 3-bit; must set to 0
+	packetHeader.flags.z = htons(0);		// 1-bit; must set to 0
 	packetHeader.flags.ra = 0;			// 1-bit
 	packetHeader.gdcount = htons(1); 		// 16-bit; specifies the # of entries in the question section
 	packetHeader.ancount = htons(0);		// 16-bit; specifies the # of resource records in the answer section
@@ -81,6 +81,9 @@ void DugHelp::stringToHex () {
 	for (int i = 0; i < storage.size(); i++) { qname_labelFormat.append(storage[i]); }
 
 	std::cout << "The hex representation of qname TOTAL: " << qname_labelFormat << std::endl;
+
+	packetQuestion.name = {0};
+	packetQuestion.name = (unsigned char*)qname_labelFormat.c_str();
 }
 
 void DugHelp::createQueryQuestion () {
@@ -98,9 +101,9 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	  { queryTypeNum = 1;  }
 
-	packetQuestion.qtype = htons(queryTypeNum);
+	packetQuestion.qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
-	packetQuestion.qclass = htons(1);
+	packetQuestion.qdata->qclass = htons(1);
 }
 
 void DugHelp::readReceivedBuffer (unsigned char* buffer) {
@@ -167,17 +170,11 @@ void DugHelp::sendPacket () {
 	// find the size to allocate for the message buffer
 	int size = sizeof(struct DNS_Header);
 	size += sizeof(struct DNS_Question);
-	char *message [size];
+	char *message[size];
 	int totalSize = 0;
-	int stringSize = qname_labelFormat.length() + 1;
-	char* temp = {0};
-	temp = (char*)qname_labelFormat.c_str();
 
 	std::memcpy(message, (struct DNS_Header*)&packetHeader, sizeof(packetHeader));
 	totalSize = sizeof(struct DNS_Header);
-
-	std::memcpy(message + totalSize, (char*)temp, sizeof(qname_labelFormat));
-	totalSize += sizeof(qname_labelFormat);
 
 	std::memcpy(message + totalSize, (struct DNS_Question*)&packetQuestion, sizeof(packetQuestion));
 	totalSize += sizeof(packetQuestion);

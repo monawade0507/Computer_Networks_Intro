@@ -22,46 +22,59 @@ class DugHelp {
 		struct DNS Header
 		*/
 		struct DNS_Header {
-			uint16_t id;
+			unsigned short id;
 			struct {
-				uint8_t rd: 1;		// recursion desired
-				uint8_t tc: 1;		// message was truncated
-				uint8_t aa: 1;		// authoritative answer
-				uint8_t opcode: 4;	// query type
+				unsigned char rd: 1;		// recursion desired
+				unsigned char tc: 1;		// message was truncated
+				unsigned char aa: 1;		// authoritative answer
+				unsigned char opcode: 4;	// query type
 				// 0 a standard query (QUERY); 1 an inverse query (IQUERY);
 				// 2 a server status request (STATUS);
 				// 3 - 15 reserved for futre use
-				uint8_t qr: 1;		// query(0) or response (1)
+				unsigned char qr: 1;		// query(0) or response (1)
 
-				uint8_t rcode: 4;	// response code
+				unsigned char rcode: 4;	// response code
 				// 0: No error condition; 1:Format error; 2:Server failure;
 				// 3: Name Error (authoritative server, name doesn't exist)
 				// 4: Not implemented; 5: Refused
-				uint8_t z: 3;		// reserved for future use. Must be zero
-				uint8_t ra: 1;		// recursion
+				unsigned char z: 1;		// reserved for future use. Must be zero
+				unsigned char ra: 1;		// recursion
 				} flags;
-			uint16_t gdcount;
-			uint16_t ancount;
-			uint16_t nscount;
-			uint16_t arcount;
+			unsigned short gdcount;
+			unsigned short ancount;
+			unsigned short nscount;
+			unsigned short arcount;
 		};
 		/**************************************************************************
-		struct DNS Question
+		struct DNS Question Data
 		*/
-		struct DNS_Question {
-			uint16_t qtype;
-			uint16_t qclass;
+		struct DNS_Question_Data {
+			unsigned short qtype;
+			unsigned short qclass;
+		};
+		/**************************************************************************
+		struct DNS answer data
+		*/
+		struct DNS_Answer_Data {
+			unsigned short type;
+			unsigned short _class;
+			unsigned int ttl;
+			unsigned int len;
 		};
 		/**************************************************************************
 		struct DNS answer
 		*/
 		struct DNS_Answer {
 			unsigned char *name;
-			uint16_t type;
-			uint16_t ansclass;
-			uint16_t ttl;
-			uint16_t rdlength;
-			uint16_t rdata;
+			struct DNS_Answer_Data *resource;
+			unsigned char *rdata;
+		};
+		/**************************************************************************
+		struct DNS Question
+		*/
+		struct DNS_Question {
+			unsigned char *name;
+			struct DNS_Question_Data *qdata;
 		};
 		/**************************************************************************
 		DNS required variables
@@ -70,6 +83,7 @@ class DugHelp {
 		std::string IPaddress;
 		std::string queryType = "";
 		std::string qname_labelFormat;
+
 		DNS_Header packetHeader;
 		DNS_Question packetQuestion;
 		DNS_Answer packetAnswer;

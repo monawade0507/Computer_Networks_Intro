@@ -90,7 +90,6 @@ void DugHelp::stringToHex () {
 
 void DugHelp::createQueryQuestion () {
 	dnsQuestion = (struct DNS_Question *)&buf[sizeof(struct DNS_Header) + 1];
-	//qname = (unsigned char*)&buf[sizeof(struct DNS_Header)];
 	stringToHex();
 	//dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
 
@@ -108,7 +107,8 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "")	    { queryTypeNum = 1;  }
 
 	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + sizeof(dnsQuestion->name) + 1];
-
+	//dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + ((sizeof(dnsQuestion->name))*4) + 1];
+	std::cout << "sizeof name: " << sizeof(dnsQuestion->name) << std::endl;
 	dnsQuestion->qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
 	dnsQuestion->qdata->qclass = htons(1);

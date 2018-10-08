@@ -89,7 +89,7 @@ void DugHelp::stringToHex () {
 void DugHelp::createQueryQuestion () {
 	dnsQuestion = (struct DNS_Question *)&buf;
 	stringToHex();
-	dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
+	//dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
 
 	int queryTypeNum = 0;
 

@@ -112,7 +112,7 @@ class DugHelp {
 		int portNum = -1;
 		int n = 0;
 		Log* logger = new Log();
-		unsigned char buf[65536];
+		unsigned char buf[65536], *qname, *reader;
 
 	public:
 		/*************************************************************************

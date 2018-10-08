@@ -49,7 +49,7 @@ void DugHelp::createQueryHeader () {
 
 void DugHelp::stringToHex () {
 	// converting hostname to label/data pair using hex representation;
-	dnsQuestion->name = (unsigned char*)&buf[sizeof(struct DNS_Header)];
+	dnsQuestion->name = (unsigned char*)&buf[255];
 	//dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));
 	hostname.push_back(' ');
 	int len = hostname.length();
@@ -76,7 +76,6 @@ void DugHelp::stringToHex () {
 		char c = hostname[i];
 		char C = std::toupper(c);
 		temp.push_back((int)C);
-		temp.push_back((int)C);
 		segCount ++;
 	}
 
@@ -84,6 +83,7 @@ void DugHelp::stringToHex () {
 		std::cout << storage[i];
 		dnsQuestion->name[i] = storage[i];
 	}
+	std::cout << std::endl;
 }
 
 void DugHelp::createQueryQuestion () {
@@ -153,7 +153,7 @@ void DugHelp::setupAddress ()
 		logger->printLog( "inet_aton failded");
 		exit(-1);
 	}
-  logger->printLog("Address has been created for socket");
+  	logger->printLog("Address has been created for socket");
 }
 
 void DugHelp::makeConnection () {
@@ -167,7 +167,7 @@ void DugHelp::makeConnection () {
 }
 
 void DugHelp::sendPacket () {
-
+	/*
 	if (sendto(sock, (char*)buf, sizeof(struct DNS_Header) + sizeof(struct DNS_Question), 0, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
 		logger->printLog ("sendto Failed");
 		std::string message = strerror(errno);
@@ -175,6 +175,26 @@ void DugHelp::sendPacket () {
 		exit(-1);
 	}
 	logger->printLog ("sendTo was successful");
+	*/
+
+	char *message;
+        message = (char *)malloc(2048);	
+	int totalSize = 0;
+	memcpy(message, dnsHeader, sizeof(struct DNS_Header) + 1);
+	totalSize += sizeof(struct DNS_Header) + 1;
+	memcpy(message+totalSize, dnsQuestion, sizeof(struct DNS_Question) + 1);
+        totalSize += sizeof(struct DNS_Question) + 1;
+
+	std::cout << "Send " << totalSize << " amount of bytes" << std::endl;
+	std::cout << "Header size: " << sizeof(struct DNS_Header) + 1 << std::endl;
+	std::cout << "Question size: " << sizeof(struct DNS_Question) + 1 << std::endl;
+	
+	int bytesSent = 0;
+	if ((bytesSent = write(sock, message, totalSize)) < 0) {
+		logger->printLog("error with write(...)");
+	}
+	std::cout << "write(...) was successful." << std::endl;	
+
 }
 
 int DugHelp::getPacket () {
@@ -187,8 +207,7 @@ int DugHelp::getPacket () {
 		}
 		else {
 			logger->printLog("read was successful");
-			for (int i = 0; i < 30; i++) { std::cout << buffer[i] << std::endl;			}
-			return 1;
+			return -1;
 		}
 	}
 

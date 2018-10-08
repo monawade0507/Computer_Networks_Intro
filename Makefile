@@ -30,13 +30,13 @@ log.o : log.cc log.h
 # Please remember not to submit objects or binarys.
 #
 clean:
-	rm -f core dug.o dug_help.o log.o
+	rm -f core dug.o dug_help.o log.o dug
 
 #
 # This might work to create the submission tarball in the formal I asked for.
 #
 submit:
-	rm -f core project2 dug.o dug_help.o log.o 
+	rm -f core project2 dug.o dug_help.o log.o dug
 	mkdir `whoami`
 	cp Makefile README.txt *.h *.cc `whoami`
 	tar cf `whoami`.tar `whoami`

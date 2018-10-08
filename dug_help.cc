@@ -47,10 +47,8 @@ void DugHelp::createQueryHeader () {
 
 }
 
-void DugHelp::stringToHex () {
-	// converting hostname to label/data pair using hex representation;
-	dnsQuestion->name = (unsigned char*)&buf[255];
-	//dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));
+void DugHelp::stringToDec () {
+	// converting hostname to label/data pair using decimal representation;
 	hostname.push_back(' ');
 	int len = hostname.length();
 
@@ -79,19 +77,26 @@ void DugHelp::stringToHex () {
 		segCount ++;
 	}
 
+	// storing the dec values found in qname
+	qnameSize = storage.size();
+	qname = new int[qnameSize];
 	for ( int i = 0; i < storage.size(); i++){
 		std::cout << storage[i];
-		dnsQuestion->name[i] = storage[i];
+		qname[i] = storage[i];
 	}
-	std::cout << "HERE" << std::endl;
-	qname = (unsigned char *)&buf[sizeof(struct DNS_Header) + 2];
-	memcpy(qname, dnsQuestion->name, sizeof(dnsQuestion->name));
+  std::cout << std::endl;
+
+	//testing qname
+	for (int i = 0; i < qnameSize; i++){
+		std::cout << qname[i];
+	}
+	std::cout << std::endl;
+
 }
 
 void DugHelp::createQueryQuestion () {
-	dnsQuestion = (struct DNS_Question *)&buf[sizeof(struct DNS_Header) + 1];
-	stringToHex();
-	//dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
+	stringToDec();
+
 
 	int queryTypeNum = 0;
 
@@ -106,15 +111,12 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	    { queryTypeNum = 1;  }
 
-	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + sizeof(dnsQuestion->name) + 1];
-	//dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + ((sizeof(dnsQuestion->name))*4) + 1];
-	std::cout << "sizeof name: " << sizeof(dnsQuestion->name) << std::endl;
-	dnsQuestion->qdata->qtype = htons(queryTypeNum);
-	std::cout << "QType value set to: " << queryTypeNum << std::endl;
-	dnsQuestion->qdata->qclass = htons(1);
-}
-
-void DugHelp::readReceivedBuffer (unsigned char* buffer) {
+	unsigned char questionBuf[1000];
+	dnsQuestion = (struct DNS_Question *)&questionBuf;
+	dnsQuestion->name = (unsigned char*)qname;
+	dnsQuestion->qdata.qtype = queryTypeNum;
+	dnsQuestion->qdata.qclass = 1;
+	buf[sizeof(struct DNS_Header)] = *questionBuf;
 }
 
 /*************************************************
@@ -126,7 +128,9 @@ void DugHelp::createSocket ()
 	logger->setLogger(true);
 	if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
 	{
-		logger->printLog ("Error opening socket");
+		logger->printLog ("Error opening socekt");
+	//dnsQuestion->name = (unsigned char*)&buf[255];
+	//dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));ning socket");
 		exit (-1);
 	}
 	else

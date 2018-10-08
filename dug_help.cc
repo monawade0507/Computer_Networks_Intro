@@ -87,7 +87,7 @@ void DugHelp::stringToHex () {
 }
 
 void DugHelp::createQueryQuestion () {
-	dnsQuestion = (struct DNS_Question *)&buf;
+	dnsQuestion = (struct DNS_Question *)&buf[sizeof(struct DNS_Header)];
 	stringToHex();
 	//dnsQuestion = (struct DNS_Question*)&buf[sizeof((struct DNS_Header*) + strlen((const char*)dnsQuestion->name) + 1)];
 
@@ -104,7 +104,7 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	  { queryTypeNum = 1;  }
 
-	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf;
+	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + sizeof(dnsQuestion->name)];
 	dnsQuestion->qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
 	dnsQuestion->qdata->qclass = htons(1);
@@ -178,7 +178,7 @@ void DugHelp::sendPacket () {
 	*/
 
 	char *message;
-        message = (char *)malloc(2048);	
+        message = (char *)malloc(2048);
 	int totalSize = 0;
 	memcpy(message, dnsHeader, sizeof(struct DNS_Header) + 1);
 	totalSize += sizeof(struct DNS_Header) + 1;
@@ -188,12 +188,12 @@ void DugHelp::sendPacket () {
 	std::cout << "Send " << totalSize << " amount of bytes" << std::endl;
 	std::cout << "Header size: " << sizeof(struct DNS_Header) + 1 << std::endl;
 	std::cout << "Question size: " << sizeof(struct DNS_Question) + 1 << std::endl;
-	
+
 	int bytesSent = 0;
 	if ((bytesSent = write(sock, message, totalSize)) < 0) {
 		logger->printLog("error with write(...)");
 	}
-	std::cout << "write(...) was successful." << std::endl;	
+	std::cout << "write(...) was successful." << std::endl;
 
 }
 

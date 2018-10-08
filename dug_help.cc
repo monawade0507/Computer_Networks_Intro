@@ -49,45 +49,41 @@ void DugHelp::createQueryHeader () {
 
 void DugHelp::stringToHex () {
 	// converting hostname to label/data pair using hex representation;
-	// store result in variable: std::string qname_labelFormat
-	static const char* const hex = "0123456789ABCDEF";
+	dnsQuestion->name = (unsigned char*)&buf[sizeof(struct DNS_Header)];
+	//dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));
 	hostname.push_back(' ');
 	int len = hostname.length();
 
+	std::vector<int> storage;
+	std::vector<int> temp;
 	int segCount = 0;
-	std::vector<std::string> storage;
-	std::string temp = "";
 
-	for (int i  = 0; i < len; i++) {
+	for (int i = 0; i < len; i++)
+	{
 		if (hostname[i] == '.' || hostname[i] == ' ') {
-			storage.push_back(std::to_string(0));
-			storage.push_back(std::to_string(segCount));
-			storage.push_back(temp);
+			storage.push_back(0);
+			storage.push_back(segCount);
+			for (int j = 0; j < temp.size(); j++){
+				storage.push_back(temp[j]);
+			}
+
 			// reset
 			segCount = 0;
-			temp = "";
+			temp.clear();
 			continue;
 		}
-		const unsigned char c = hostname[i];
-		std::cout << c << " : " << hex[c >> 4] << " " << hex[c & 15] << std::endl;
-		temp.push_back(hex[c >> 4]);
-		temp.push_back(hex[c & 15]);
+
+		char c = hostname[i];
+		char C = std::toupper(c);
+		temp.push_back((int)C);
+		temp.push_back((int)C);
 		segCount ++;
-		continue;
 	}
 
-	storage.push_back(std::to_string(0));
-	storage.push_back(std::to_string(0));
-
-	for (int i = 0; i < storage.size(); i++) { qname_labelFormat.append(storage[i]); }
-
-	std::cout << "The hex representation of qname TOTAL: " << qname_labelFormat << std::endl;
-
-	dnsQuestion->name = (unsigned char*)&buf[sizeof(struct DNS_Header)];
-	dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));
-	dnsQuestion->name = (unsigned char*)qname_labelFormat.c_str();
-
-
+	for ( int i = 0; i < storage.size(); i++){
+		std::cout << storage[i];
+		dnsQuestion->name[i] = storage[i];
+	}
 }
 
 void DugHelp::createQueryQuestion () {
@@ -115,11 +111,6 @@ void DugHelp::createQueryQuestion () {
 }
 
 void DugHelp::readReceivedBuffer (unsigned char* buffer) {
-	struct DNS_Header *dns = NULL;
-	dns = (struct DNS_Header*)buffer;
-	for ( int i = 0; i < 20; i++) {
-	std::cout << ntohs(buffer[i]) << std::endl; }
-	std::cout << "Answers: " << ntohs(dns->flags.rcode) << std::endl;
 }
 
 /*************************************************
@@ -143,6 +134,7 @@ void DugHelp::createSocket ()
 
 void DugHelp::setupAddress ()
 {
+
 	// define the struct
 	//srand(time(NULL));
 	//portNum = (rand() % 10000 + 1024);
@@ -161,7 +153,7 @@ void DugHelp::setupAddress ()
 		logger->printLog( "inet_aton failded");
 		exit(-1);
 	}
-	logger->printLog("Address has been created for socket");
+  logger->printLog("Address has been created for socket");
 }
 
 void DugHelp::makeConnection () {

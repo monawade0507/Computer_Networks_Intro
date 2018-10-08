@@ -104,7 +104,9 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	  { queryTypeNum = 1;  }
 
-	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + sizeof(dnsQuestion->name) + 1];
+	dnsQuestion->qdata = (struct DNS_Question_Data *)&buf[sizeof(struct DNS_Header) + ((sizeof(dnsQuestion->name))*4) + 1];
+	std::cout << "sizeof name: " << (sizeof(dnsQuestion->name))*4 << std::endl;
+
 	dnsQuestion->qdata->qtype = htons(queryTypeNum);
 	std::cout << "QType value set to: " << queryTypeNum << std::endl;
 	dnsQuestion->qdata->qclass = htons(1);

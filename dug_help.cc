@@ -30,6 +30,7 @@ void DugHelp::setQueryType (std::string type) {
 
 void DugHelp::createQueryHeader () {
 	// create Query Header with struct
+	memset(buf, 0, sizeof(buf));
 	dnsHeader = (struct DNS_Header *)&buf;
 	dnsHeader->id = (unsigned short) htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
 	dnsHeader->flags.rd = 0;			// 1-bit
@@ -79,10 +80,10 @@ void DugHelp::stringToDec () {
 
 	// storing the dec values found in qname
 	qnameSize = storage.size();
-	qname = new int[qnameSize];
+	memset(qname, 0, 255);
 	for ( int i = 0; i < storage.size(); i++){
 		std::cout << storage[i];
-		qname[i] = storage[i];
+		qname[i] = (unsigned char)storage[i];
 	}
   std::cout << std::endl;
 
@@ -97,7 +98,6 @@ void DugHelp::stringToDec () {
 void DugHelp::createQueryQuestion () {
 	stringToDec();
 
-
 	int queryTypeNum = 0;
 
 	if (queryType == "A")     { queryTypeNum = 1;  }
@@ -111,16 +111,23 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	    { queryTypeNum = 1;  }
 
-	unsigned char questionBuf[1000];
+	unsigned char questionBuf[qnameSize + 4];
+	memset(questionBuf, 0, qnameSize + 4);
+	memcpy(questionBuf, qname, qnameSize);
+	questionBuf[qnameSize + 1] = (unsigned char)queryTypeNum;
+	questionBuf[qnameSize + 2] = (unsigned char)1;
+	/*
 	dnsQuestion = (struct DNS_Question *)&questionBuf;
 	dnsQuestion->name = (unsigned char*)qname;
 	dnsQuestion->qdata.qtype = queryTypeNum;
-	dnsQuestion->qdata.qclass = 1;
-	buf[sizeof(struct DNS_Header)] = *questionBuf;
+	dnsQuestion->qdata.qclass = 1; */
+	//buf[sizeof(struct DNS_Header)] = *questionBuf;
+	// think about doing a memcpy instead
+	memcpy(buf + sizeof(struct DNS_Header), questionBuf, sizeof(questionBuf));
 }
 
 /*************************************************
-Implementation of UDP Socket methods
+Implementation of UDP Socket methodsbzero((char *)&servAddr, sizeof(servAddr));
 */
 
 void DugHelp::createSocket ()
@@ -129,8 +136,6 @@ void DugHelp::createSocket ()
 	if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		logger->printLog ("Error opening socekt");
-	//dnsQuestion->name = (unsigned char*)&buf[255];
-	//dnsQuestion->name = (unsigned char*)std::malloc(sizeof(struct DNS_Header));ning socket");
 		exit (-1);
 	}
 	else
@@ -142,7 +147,6 @@ void DugHelp::createSocket ()
 
 void DugHelp::setupAddress ()
 {
-
 	// define the struct
 	//srand(time(NULL));
 	//portNum = (rand() % 10000 + 1024);
@@ -168,23 +172,12 @@ void DugHelp::makeConnection () {
 	if (connect(sock, (const sockaddr*) &servAddr, sizeof(servAddr))) {
 		logger->printLog ("Connect Failed");
 		std::string message = strerror(errno);
-		logger->printLog(message);
 		exit(-1);
 	}
 	logger->printLog ("Connection was made");
 }
 
 void DugHelp::sendPacket () {
-	/*
-	if (sendto(sock, (char*)buf, sizeof(struct DNS_Header) + sizeof(struct DNS_Question), 0, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
-		logger->printLog ("sendto Failed");
-		std::string message = strerror(errno);
-		logger->printLog(message);
-		exit(-1);
-	}
-	logger->printLog ("sendTo was successful");
-	*/
-
 	char *message;
         message = (char *)malloc(2048);
 	int totalSize = 0;

@@ -121,7 +121,7 @@ class DugHelp {
 		int n = 0;
 		Log* logger = new Log();
 		unsigned char buf[2000], *reader;
-		int *qname;
+		unsigned char qname[255];
 		int qnameSize = 0;
 
 	public:

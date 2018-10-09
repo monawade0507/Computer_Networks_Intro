@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	// sending packet query
 	dug_helper.sendPacket();
 	// recieve the packet answer
-	dug_helper.getPacket();
+	int returnValue = dug_helper.getPacket();
 
 	return 0;
 }

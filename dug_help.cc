@@ -32,7 +32,7 @@ void DugHelp::createQueryHeader () {
 	// create Query Header with struct
 	memset(buf, 0, sizeof(buf));
 	dnsHeader = (struct DNS_Header *)&buf;
-	dnsHeader->id = (unsigned short) htons(1337);	// 16-bit; some random id that can be checked when a message is recieved
+	dnsHeader->id = (unsigned short) htons(1337);// 16-bit; some random id that can be checked when a message is recieved
 	dnsHeader->flags.rd = 0;			// 1-bit
 	dnsHeader->flags.tc = 0;			// 1-bit
 	dnsHeader->flags.aa = 0;			// 1-bit
@@ -45,7 +45,7 @@ void DugHelp::createQueryHeader () {
 	dnsHeader->ancount = htons(0);		// 16-bit; specifies the # of resource records in the answer section
 	dnsHeader->nscount = htons(0);		// 16-bit; specifies the # of name server resource records in the authority records section
 	dnsHeader->arcount = htons(0);		// 16-bit; specifies the # of resource records in the additional records section
-
+	dnsHeader->flags.rd;
 }
 
 void DugHelp::stringToDec () {
@@ -164,15 +164,6 @@ void DugHelp::setupAddress ()
   	logger->printLog("Address has been created for socket");
 }
 
-void DugHelp::makeConnection () {
-	if (connect(sock, (const sockaddr*) &servAddr, sizeof(servAddr))) {
-		logger->printLog ("Connect Failed");
-		std::string message = strerror(errno);
-		exit(-1);
-	}
-	logger->printLog ("Connection was made");
-}
-
 void DugHelp::sendPacket () {
 	int bytesSent = sizeof(struct DNS_Header) + qnameSize + 6;
 	unsigned char message[bytesSent];
@@ -183,23 +174,30 @@ void DugHelp::sendPacket () {
 		logger->printLog("error with write(...)");
 	}
 	std::cout << "write(...) was successful." << std::endl;
-
 }
 
 int DugHelp::getPacket () {
-	/*
-	while (1) {
-		std::memset(buf, 0, sizeof(buf));
-		n = 0;
-		if ((n = read(sock, buf, 65536)) < 0) {
+  memset(buf, 0, 2000);
+	if ((n = read(sock, buf, 2000)) < 0) {
 			logger->printLog("Error reading data");
 			exit(-1);
-		}
-		else {
-			logger->printLog("read was successful");
-			return -1;
-		}
 	}
-	*/
 
+	for (int i = 0; i < 100; i++) {
+		std::cout << buf[i];
+	}
+
+	std::cout << std::endl;
+	/*
+  dnsAnswer = (struct DNS_Answer *)&buf;
+	testing purposes
+	std::cout << dnsAnswer->name << std::endl;
+	std::cout << dnsAnswer->types.type << std::endl;
+	std::cout << dnsAnswer->types._class << std::endl;
+	std::cout << dnsAnswer->types.ttl << std::endl;
+	std::cout << dnsAnswer->types.len << std::endl;
+	std::cout << dnsAnswer->data << std::endl;
+  */
+
+	return 0;
 }

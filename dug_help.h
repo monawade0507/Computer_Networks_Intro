@@ -65,24 +65,14 @@ class DugHelp {
 		struct DNS answer
 		*/
 		struct DNS_Answer {
-			unsigned char *name;
-			struct DNS_Answer_Data *resource;
-			unsigned char *rdata;
-		};
-		/**************************************************************************
-		struct DNS Question
-
-		struct DNS_Question {
-			unsigned char *name;
-			struct DNS_Question_Data *qdata;
-		};
-		*/
-		struct DNS_Question {
-			unsigned char *name;
+			unsigned char name[255];
 			struct {
-				unsigned short qtype;
-				unsigned short qclass;
-			} qdata;
+				unsigned short type;
+				unsigned short _class;
+				unsigned int ttl;
+				unsigned int len;
+			} types;
+			unsigned char data[2000];
 		};
 		/**************************************************************************
 		DNS required variables
@@ -90,14 +80,10 @@ class DugHelp {
 		std::string hostname;
 		std::string IPaddress;
 		std::string queryType = "";
-		std::string qname_labelFormat;
-
-		DNS_Header packetHeader;
-		DNS_Question packetQuestion;
-		DNS_Answer packetAnswer;
 
 		struct DNS_Header *dnsHeader = NULL;
 		struct DNS_Question *dnsQuestion = NULL;
+		struct DNS_Answer *dnsAnswer = NULL;
 		/***************************************************************************
 		UDP Socket required struct
 		struct sockaddr_in
@@ -130,7 +116,6 @@ class DugHelp {
 		*/
 		void createSocket();
 		void setupAddress();
-		void makeConnection();
 		void sendPacket();
 		int getPacket();
 		/*************************************************************************
@@ -145,6 +130,4 @@ class DugHelp {
 		void createQueryHeader();
 		void stringToDec();	  // converting the hostname to qname (length/data pair)
 		void createQueryQuestion();
-		DNS_Header returnDNSHeader() { return packetHeader; }
-		DNS_Question returnDNSQuestion() { return packetQuestion; }
 };

@@ -60,7 +60,6 @@ void DugHelp::stringToDec () {
 	for (int i = 0; i < len; i++)
 	{
 		if (hostname[i] == '.' || hostname[i] == ' ') {
-			storage.push_back(0);
 			storage.push_back(segCount);
 			for (int j = 0; j < temp.size(); j++){
 				storage.push_back(temp[j]);
@@ -111,18 +110,15 @@ void DugHelp::createQueryQuestion () {
 	if (queryType == "AAAA")  { queryTypeNum = 28; }
 	if (queryType == "")	    { queryTypeNum = 1;  }
 
-	unsigned char questionBuf[qnameSize + 4];
+	unsigned char questionBuf[qnameSize + 5];
 	memset(questionBuf, 0, qnameSize + 4);
 	memcpy(questionBuf, qname, qnameSize);
-	questionBuf[qnameSize + 1] = (unsigned char)queryTypeNum;
-	questionBuf[qnameSize + 2] = (unsigned char)1;
-	/*
-	dnsQuestion = (struct DNS_Question *)&questionBuf;
-	dnsQuestion->name = (unsigned char*)qname;
-	dnsQuestion->qdata.qtype = queryTypeNum;
-	dnsQuestion->qdata.qclass = 1; */
-	//buf[sizeof(struct DNS_Header)] = *questionBuf;
-	// think about doing a memcpy instead
+	questionBuf[qnameSize] = 0;
+	questionBuf[qnameSize + 1] = 0;
+	questionBuf[qnameSize + 2] = queryTypeNum;
+	questionBuf[qnameSize + 3] = 0;
+	int queryClassNum = 1;
+	questionBuf[qnameSize + 4] = queryClassNum;
 	memcpy(buf + sizeof(struct DNS_Header), questionBuf, sizeof(questionBuf));
 }
 
@@ -178,20 +174,12 @@ void DugHelp::makeConnection () {
 }
 
 void DugHelp::sendPacket () {
-	char *message;
-        message = (char *)malloc(2048);
-	int totalSize = 0;
-	memcpy(message, dnsHeader, sizeof(struct DNS_Header) + 1);
-	totalSize += sizeof(struct DNS_Header) + 1;
-	memcpy(message+totalSize, dnsQuestion, sizeof(struct DNS_Question) + 1);
-        totalSize += sizeof(struct DNS_Question) + 1;
-
-	std::cout << "Send " << totalSize << " amount of bytes" << std::endl;
-	std::cout << "Header size: " << sizeof(struct DNS_Header) + 1 << std::endl;
-	std::cout << "Question size: " << sizeof(struct DNS_Question) + 1 << std::endl;
-
-	int bytesSent = 0;
-	if ((bytesSent = write(sock, message, totalSize)) < 0) {
+	int bytesSent = sizeof(struct DNS_Header) + qnameSize + 6;
+	unsigned char message[bytesSent];
+	memset(message, 0, bytesSent);
+	memcpy(message, buf, bytesSent);
+	std::cout << "Amount of bytes sent: " << bytesSent << std::endl;
+	if ((sendto(sock, message, bytesSent, 0, (struct sockaddr *)&servAddr, sizeof(servAddr))) < 0) {
 		logger->printLog("error with write(...)");
 	}
 	std::cout << "write(...) was successful." << std::endl;
@@ -199,6 +187,7 @@ void DugHelp::sendPacket () {
 }
 
 int DugHelp::getPacket () {
+	/*
 	while (1) {
 		std::memset(buf, 0, sizeof(buf));
 		n = 0;
@@ -211,18 +200,6 @@ int DugHelp::getPacket () {
 			return -1;
 		}
 	}
-
-	/*
-	if(read(sock, (unsigned char*) buffer, 500) < 0) {
-		logger->printLog ("recvfrom Failed");
-		std::string message = strerror(errno);
-		logger->printLog(message);
-		exit(-1);
-	}
-	else {
-		logger->printLog("read was successful");
-		// Need to print the results of the read
-		for (int i = 0; i < 500; i++) { std::cout << buffer[i]  << std::endl; }
-	}
 	*/
+
 }

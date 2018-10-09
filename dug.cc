@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	// set up socket address
 	dug_helper.setupAddress();
 	// call connect
-	dug_helper.makeConnection();
+	//dug_helper.makeConnection();
 	// sending packet query
 	dug_helper.sendPacket();
 	// recieve the packet answer

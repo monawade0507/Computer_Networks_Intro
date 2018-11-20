@@ -177,27 +177,31 @@ void DugHelp::sendPacket () {
 }
 
 int DugHelp::getPacket () {
-  memset(buf, 0, 2000);
+	memset(buf, 0, 2000);
 	if ((n = read(sock, buf, 2000)) < 0) {
 			logger->printLog("Error reading data");
 			exit(-1);
 	}
-
+	std::cout << "HERE" << std::endl;
+	// Testing the buf to see if any data was returned
+	int count = 0;
 	for (int i = 0; i < 100; i++) {
 		std::cout << buf[i];
+		count ++;
 	}
-
 	std::cout << std::endl;
+
 	/*
-  dnsAnswer = (struct DNS_Answer *)&buf;
-	testing purposes
+	std::cout << "WHY" << std::endl;
+	std::cout << std::endl;
 	std::cout << dnsAnswer->name << std::endl;
+
 	std::cout << dnsAnswer->types.type << std::endl;
 	std::cout << dnsAnswer->types._class << std::endl;
 	std::cout << dnsAnswer->types.ttl << std::endl;
 	std::cout << dnsAnswer->types.len << std::endl;
 	std::cout << dnsAnswer->data << std::endl;
-  */
+  	*/
 
 	return 0;
 }

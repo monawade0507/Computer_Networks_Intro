@@ -65,14 +65,14 @@ class DugHelp {
 		struct DNS answer
 		*/
 		struct DNS_Answer {
-			unsigned char name[255];
+			unsigned char *name;
 			struct {
 				unsigned short type;
 				unsigned short _class;
 				unsigned int ttl;
 				unsigned int len;
-			} types;
-			unsigned char data[2000];
+			} R_Data;
+			unsigned char *data;
 		};
 		/**************************************************************************
 		DNS required variables

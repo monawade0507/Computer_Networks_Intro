@@ -8,8 +8,10 @@ DugHelp::DugHelp () {
 	IPaddress = "";
 }
 
+
 void DugHelp::setHostName (std::string name) {
 	hostname = name;
+	//dnsAnswer->name = new unsigned char[name.length()];
 }
 
 void DugHelp::setIPaddress (std::string addr) {
@@ -80,17 +82,17 @@ void DugHelp::stringToDec () {
 	// storing the dec values found in qname
 	qnameSize = storage.size();
 	memset(qname, 0, 255);
-	for ( int i = 0; i < storage.size(); i++){
-		std::cout << storage[i];
+
+	for ( int i = 0; i < storage.size(); i++) {
 		qname[i] = (unsigned char)storage[i];
 	}
-  std::cout << std::endl;
 
+ 	std::string printOutName = "";
 	//testing qname
 	for (int i = 0; i < qnameSize; i++){
-		std::cout << qname[i];
+		printOutName += qname[i];
 	}
-	std::cout << std::endl;
+	logger->printLog ("QName: " + printOutName);
 
 }
 
@@ -128,7 +130,7 @@ Implementation of UDP Socket methodsbzero((char *)&servAddr, sizeof(servAddr));
 
 void DugHelp::createSocket ()
 {
-	logger->setLogger(true);
+	//logger->setLogger(true);
 	if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		logger->printLog ("Error opening socekt");
@@ -169,11 +171,11 @@ void DugHelp::sendPacket () {
 	unsigned char message[bytesSent];
 	memset(message, 0, bytesSent);
 	memcpy(message, buf, bytesSent);
-	std::cout << "Amount of bytes sent: " << bytesSent << std::endl;
+	logger->printLog("Amount of bytes sent: " + std::to_string(bytesSent));
 	if ((sendto(sock, message, bytesSent, 0, (struct sockaddr *)&servAddr, sizeof(servAddr))) < 0) {
 		logger->printLog("error with write(...)");
 	}
-	std::cout << "write(...) was successful." << std::endl;
+	logger->printLog ("write(...) was successful");
 }
 
 int DugHelp::getPacket () {
@@ -182,26 +184,94 @@ int DugHelp::getPacket () {
 			logger->printLog("Error reading data");
 			exit(-1);
 	}
-	std::cout << "HERE" << std::endl;
-	// Testing the buf to see if any data was returned
-	int count = 0;
-	for (int i = 0; i < 100; i++) {
-		std::cout << buf[i];
-		count ++;
+
+	// for (int i = 0; i  < 2000; i++ ) {
+	// 	std::cout << buf[i];
+	// }
+	// std::cout << std::endl;
+
+	dnsAnswer = new DNS_Answer();
+
+	int startingPoint = 0;
+	for (int i = 0; i < sizeof(dnsAnswer->id); i++) {
+		dnsAnswer->id[i] = buf[i];
 	}
-	std::cout << std::endl;
 
-	/*
-	std::cout << "WHY" << std::endl;
-	std::cout << std::endl;
-	std::cout << dnsAnswer->name << std::endl;
+	startingPoint = sizeof(dnsAnswer->id);
+	for (int i = 0; i < sizeof(dnsAnswer->name); i++) {
+		dnsAnswer->name[i] = buf[startingPoint + i];
+	}
 
-	std::cout << dnsAnswer->types.type << std::endl;
-	std::cout << dnsAnswer->types._class << std::endl;
-	std::cout << dnsAnswer->types.ttl << std::endl;
-	std::cout << dnsAnswer->types.len << std::endl;
-	std::cout << dnsAnswer->data << std::endl;
-  	*/
+	startingPoint += sizeof(dnsAnswer->name);
+	for (int i = 0; i < sizeof(dnsAnswer->type); i++) {
+		dnsAnswer->type[i] = ntohs(buf[startingPoint + i]);
+	}
+
+	startingPoint += sizeof(dnsAnswer->type);
+	for (int i = 0; i < sizeof(dnsAnswer->_class); i++) {
+		dnsAnswer->_class[i] = buf[startingPoint + i];
+	}
+
+	startingPoint += sizeof(dnsAnswer->_class);
+	for (int i = 0; i < sizeof(dnsAnswer->ttl); i++) {
+		dnsAnswer->ttl[i] = buf[startingPoint + i];
+	}
+
+	startingPoint += sizeof(dnsAnswer->ttl);
+	for (int i = 0; i < sizeof(dnsAnswer->len); i++) {
+		dnsAnswer->len[i] = buf[startingPoint + i];
+	}
+
+	startingPoint += sizeof(dnsAnswer->len);
+	for (int i = 0; i < sizeof(dnsAnswer->data); i++) {
+		dnsAnswer->data[i] = buf[startingPoint + i];
+	}
+
+	logger->printLog ("SAVED");
+	std::string tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->id); i++) {
+		tempPrintStr += std::to_string(ntohs(dnsAnswer->id[i]));
+	}
+	logger->printLog (tempPrintStr);
+	tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->name); i++) {
+		tempPrintStr += std::to_string(dnsAnswer->name[i]);
+	}
+	logger->printLog(tempPrintStr);
+	tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->type); i++) {
+		tempPrintStr += std::to_string(ntohs(dnsAnswer->type[i]));
+	}
+	logger->printLog(tempPrintStr);
+	tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->_class); i++) {
+		tempPrintStr += std::to_string(ntohs(dnsAnswer->_class[i]));
+	}
+	logger->printLog(tempPrintStr);
+	tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->ttl); i++) {
+		tempPrintStr += std::to_string(ntohs(dnsAnswer->ttl[i]));
+	}
+	logger->printLog(tempPrintStr);
+	tempPrintStr = "";
+
+	for (int i = 0; i < sizeof(dnsAnswer->len); i++) {
+		tempPrintStr += std::to_string(ntohs(dnsAnswer->len[i]));
+	}
+	logger->printLog(tempPrintStr);
+	tempPrintStr = "";
+
+  std::cout << "DNS Answer: Authoritative Answer: ";
+	for (int i = 0; i < sizeof(dnsAnswer->data); i++) {
+		if (dnsAnswer->data[i] != 0) {
+		tempPrintStr += dnsAnswer->data[i];}
+	}
+	std::cout << tempPrintStr << std::endl;
 
 	return 0;
 }

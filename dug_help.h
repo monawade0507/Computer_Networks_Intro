@@ -65,14 +65,13 @@ class DugHelp {
 		struct DNS answer
 		*/
 		struct DNS_Answer {
-			unsigned char *name;
-			struct {
-				unsigned short type;
-				unsigned short _class;
-				unsigned int ttl;
-				unsigned int len;
-			} R_Data;
-			unsigned char *data;
+			unsigned char id[2];
+			unsigned char name[30];									// unsigned char name[16];
+			unsigned char type[1]; 									// unsigned short type[1];
+			unsigned char _class[1];									// unsigned short _class[1];
+			unsigned char ttl[1];										// unsigned int ttl[2];
+			unsigned char len[1];										// unsigned int len[1];
+			unsigned char data[1964];									// unsigned char data[1979];
 		};
 		/**************************************************************************
 		DNS required variables
@@ -106,7 +105,7 @@ class DugHelp {
 		int portNum = -1;
 		int n = 0;
 		Log* logger = new Log();
-		unsigned char buf[2000], *reader;
+		unsigned char buf[2000];
 		unsigned char qname[255];
 		int qnameSize = 0;
 
@@ -130,4 +129,10 @@ class DugHelp {
 		void createQueryHeader();
 		void stringToDec();	  // converting the hostname to qname (length/data pair)
 		void createQueryQuestion();
+		void turnOnLogger() {
+			logger->setLogger(true);
+		}
+		void log(std::string str) {
+			logger->printLog (str);
+		}
 };

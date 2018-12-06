@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
 
 	if (_daemonize) {
 			daemonize(dug_helper);
+			// may not need the while loop
 			while(1) {
 				dug_helper.setQueryType (userQueryResponse);
 				// create the Query Header

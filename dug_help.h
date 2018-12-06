@@ -12,6 +12,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <cstring>
+#include <iomanip>
+#include <stdlib.h>
+#include <cmath>
 #include "log.h"
 
 #define ENDL " (" << __FILE__ << ":" << __LINE__ << ")"
@@ -65,13 +68,13 @@ class DugHelp {
 		struct DNS answer
 		*/
 		struct DNS_Answer {
-			unsigned char id[2];
-			unsigned char name[30];									// unsigned char name[16];
-			unsigned char type[1]; 									// unsigned short type[1];
-			unsigned char _class[1];									// unsigned short _class[1];
-			unsigned char ttl[1];										// unsigned int ttl[2];
-			unsigned char len[1];										// unsigned int len[1];
-			unsigned char data[1964];									// unsigned char data[1979];
+			uint16_t id;														// 2 bytes
+			uint8_t *name;									// unsigned char name[16];
+			uint16_t type;
+			uint16_t _class;
+			uint32_t ttl;
+			uint16_t len;
+			uint8_t *data;									// unsigned char data[1979];
 		};
 		/**************************************************************************
 		DNS required variables
@@ -135,4 +138,5 @@ class DugHelp {
 		void log(std::string str) {
 			logger->printLog (str);
 		}
+		int hexToDec(char hex[]);
 };

@@ -8,6 +8,25 @@ DugHelp::DugHelp () {
 	IPaddress = "";
 }
 
+int DugHelp::hexToDec(char hex[]) {
+	int len = strlen(hex);
+	len--;
+	int base = 1;
+	int val = 0;
+	long long dec = 0;
+
+	for(int i = 0; hex[i] != '\0'; i++) {
+		if (hex[i] >= '0' && hex[i] <= '9') {
+			val = hex[i] - 48;
+		}
+		else if (hex [i] >= 'a' && hex[i] <= 'f') {
+			val = hex[i] - 97 + 10;
+		}
+		dec += val * pow(16, len);
+		len--;
+	}
+	return dec;
+}
 
 void DugHelp::setHostName (std::string name) {
 	hostname = name;
@@ -83,9 +102,12 @@ void DugHelp::stringToDec () {
 	qnameSize = storage.size();
 	memset(qname, 0, 255);
 
+
+
 	for ( int i = 0; i < storage.size(); i++) {
 		qname[i] = (unsigned char)storage[i];
 	}
+
 
  	std::string printOutName = "";
 	//testing qname
@@ -185,93 +207,185 @@ int DugHelp::getPacket () {
 			exit(-1);
 	}
 
-	// for (int i = 0; i  < 2000; i++ ) {
-	// 	std::cout << buf[i];
-	// }
-	// std::cout << std::endl;
+  /*
+   Each octect is one char in the buf
+	 Type is 2 octets aka 2 char
+	  	interpret type 0x0001 (A record)
+	 Class is 2 octets aka 2 char
+	 TTL is 4 octets aka 4 char
+   RDLength is 2 octets aka 2 char
+	*/
 
-	dnsAnswer = new DNS_Answer();
+	 int endPosition = 0;
+	 int loc = 0;
+	 std::string id = "0x";
+	 std::string flags = "0x";
+	 std::string question = "0x";
+	 std::string ans_RR = "0x";
+	 std::string authority_RR = "0x";
+	 std::string additional_RR = "0x";
+	 std::string query_name = "";
+	 std::string zero_char = "";
+	 std::string query_type = "0x";
+	 std::string query_class = "0x";
+	 std::string data = "";
+	 std::string ans_type = "0x";
+	 std::string ip_addr = "";
 
-	int startingPoint = 0;
-	for (int i = 0; i < sizeof(dnsAnswer->id); i++) {
-		dnsAnswer->id[i] = buf[i];
+	 std::stringstream buffer;
+	 std::stringstream temp;
+	 // getting the id
+	 for (int i = 0; i < 2; i++) {
+		 buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	 }
+	 id += buffer.str();
+	 endPosition += 2;
+
+	 buffer.clear();
+	 buffer.str(std::string());
+
+	 // get the flags
+	 for (int i = 0; i < 2; i++) {
+		 buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	 }
+	 flags += buffer.str();
+	 endPosition += 2;
+
+	 buffer.clear();
+	 buffer.str(std::string());
+
+	 // get the question code
+	 for (int i = 0; i < 2; i++) {
+		 buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	 }
+	 question += buffer.str();
+	 endPosition += 2;
+
+	 buffer.clear();
+	 buffer.str(std::string());
+
+	 // get the answer RR
+	 for (int i = 0; i < 2; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	 }
+	 ans_RR += buffer.str();
+	 endPosition += 2;
+
+	 buffer.clear();
+	 buffer.str(std::string());
+
+	 // get the authority RR
+	 for (int i = 0; i < 2; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	authority_RR += buffer.str();
+	endPosition += 2;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// get the additional RR
+	for (int i = 0; i < 2; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	additional_RR += buffer.str();
+	endPosition += 2;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// get the query Name
+	for (int i = 0; i < qnameSize; i++) {
+		buffer << buf[endPosition + i];
+	}
+	query_name += buffer.str();
+	endPosition += qnameSize;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// There is a zero bit between the query name and the query type
+	for (int i = 0; i < 1; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	zero_char += buffer.str();
+	endPosition += 1;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// get the query type
+	for (int i = 0; i < 2; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	query_type += buffer.str();
+	endPosition += 2;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// get the query class
+	for (int i = 0; i < 2; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	query_class += buffer.str();
+	endPosition += 2;
+
+	buffer.clear();
+	buffer.str(std::string());
+
+	// Get IP address
+	// Step 1: build hex representation to search for Type A : 00 01
+	for (int i = 0; i < 150; i++) {
+		buffer << std::setfill('0') << std::setw(2) << std::hex << (int)buf[endPosition + i];
+	}
+	data += buffer.str();
+
+	// Step 2: Look for 00 01
+	for (int i = 0; data.length(); i++) {
+		if ( (i + 7) < data.length()) {
+			if (data[i] == '0' && data[i + 1] == '0' && data[i + 2] == '0' && data[i + 3] == '1' && data[i + 4] == '0' && data[i + 5] == '0' && data[i + 6] == '0' && data[i + 7] == '1' ) {
+				temp << std::setfill('0') << std::hex << data[i] << data[i + 1] << data[i + 2] << data[i + 3];
+				ans_type += temp.str();
+				loc = i;
+				break;
+			}
+		}
 	}
 
-	startingPoint = sizeof(dnsAnswer->id);
-	for (int i = 0; i < sizeof(dnsAnswer->name); i++) {
-		dnsAnswer->name[i] = buf[startingPoint + i];
+	temp.clear();
+	temp.str(std::string());
+	buffer.clear();
+	buffer.str(std::string());
+
+  // Step 3: get IP with the location found
+	for (int i = 0; i < 4; i++) {
+		temp << std::setfill('0') << std::setw(2) << std::hex << (int)buf[loc + i];
+		char hexStr[17];
+		temp >> hexStr;
+		int num = hexToDec(hexStr);
+		buffer << std::to_string(num);
+		temp.clear();
+		temp.str(std::string());
+		//buffer << (int)buf[loc + i];
+		if (i < 3) { buffer << ".";}
 	}
+	ip_addr += buffer.str();
 
-	startingPoint += sizeof(dnsAnswer->name);
-	for (int i = 0; i < sizeof(dnsAnswer->type); i++) {
-		dnsAnswer->type[i] = ntohs(buf[startingPoint + i]);
-	}
+	 // Printing out Answers
+	 logger->printLog("ID: " + id);
+	 logger->printLog("Flags: " + flags);
+	 logger->printLog("Question code: " + question);
+	 logger->printLog("Answer RR: " + ans_RR);
+	 logger->printLog("Authority RR: " + authority_RR);
+	 logger->printLog("Additonal RR: " + additional_RR);
+	 logger->printLog("Query Name: " + query_name);
+	 logger->printLog("Query Type: " + query_type);
+	 logger->printLog("Query Class: " + query_class);
+	 logger->printLog("Answer Type: " + ans_type);
+	 if (ans_type == "0x0001") {
+		 std::cout << "Authoritative Answer: " << ip_addr << std::endl;
+	 }
 
-	startingPoint += sizeof(dnsAnswer->type);
-	for (int i = 0; i < sizeof(dnsAnswer->_class); i++) {
-		dnsAnswer->_class[i] = buf[startingPoint + i];
-	}
 
-	startingPoint += sizeof(dnsAnswer->_class);
-	for (int i = 0; i < sizeof(dnsAnswer->ttl); i++) {
-		dnsAnswer->ttl[i] = buf[startingPoint + i];
-	}
-
-	startingPoint += sizeof(dnsAnswer->ttl);
-	for (int i = 0; i < sizeof(dnsAnswer->len); i++) {
-		dnsAnswer->len[i] = buf[startingPoint + i];
-	}
-
-	startingPoint += sizeof(dnsAnswer->len);
-	for (int i = 0; i < sizeof(dnsAnswer->data); i++) {
-		dnsAnswer->data[i] = buf[startingPoint + i];
-	}
-
-	logger->printLog ("SAVED");
-	std::string tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->id); i++) {
-		tempPrintStr += std::to_string(ntohs(dnsAnswer->id[i]));
-	}
-	logger->printLog (tempPrintStr);
-	tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->name); i++) {
-		tempPrintStr += std::to_string(dnsAnswer->name[i]);
-	}
-	logger->printLog(tempPrintStr);
-	tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->type); i++) {
-		tempPrintStr += std::to_string(ntohs(dnsAnswer->type[i]));
-	}
-	logger->printLog(tempPrintStr);
-	tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->_class); i++) {
-		tempPrintStr += std::to_string(ntohs(dnsAnswer->_class[i]));
-	}
-	logger->printLog(tempPrintStr);
-	tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->ttl); i++) {
-		tempPrintStr += std::to_string(ntohs(dnsAnswer->ttl[i]));
-	}
-	logger->printLog(tempPrintStr);
-	tempPrintStr = "";
-
-	for (int i = 0; i < sizeof(dnsAnswer->len); i++) {
-		tempPrintStr += std::to_string(ntohs(dnsAnswer->len[i]));
-	}
-	logger->printLog(tempPrintStr);
-	tempPrintStr = "";
-
-  std::cout << "DNS Answer: Authoritative Answer: ";
-	for (int i = 0; i < sizeof(dnsAnswer->data); i++) {
-		if (dnsAnswer->data[i] != 0) {
-		tempPrintStr += dnsAnswer->data[i];}
-	}
-	std::cout << tempPrintStr << std::endl;
-
-	return 0;
 }

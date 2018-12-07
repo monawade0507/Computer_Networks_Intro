@@ -12,6 +12,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <cstring>
+#include <iomanip>
+#include <stdlib.h>
+#include <cmath>
 #include "log.h"
 
 #define ENDL " (" << __FILE__ << ":" << __LINE__ << ")"
@@ -65,14 +68,13 @@ class DugHelp {
 		struct DNS answer
 		*/
 		struct DNS_Answer {
-			unsigned char *name;
-			struct {
-				unsigned short type;
-				unsigned short _class;
-				unsigned int ttl;
-				unsigned int len;
-			} R_Data;
-			unsigned char *data;
+			uint16_t id;														// 2 bytes
+			uint8_t *name;									// unsigned char name[16];
+			uint16_t type;
+			uint16_t _class;
+			uint32_t ttl;
+			uint16_t len;
+			uint8_t *data;									// unsigned char data[1979];
 		};
 		/**************************************************************************
 		DNS required variables
@@ -106,7 +108,7 @@ class DugHelp {
 		int portNum = -1;
 		int n = 0;
 		Log* logger = new Log();
-		unsigned char buf[2000], *reader;
+		unsigned char buf[2000];
 		unsigned char qname[255];
 		int qnameSize = 0;
 		int bytesSent = 0;
@@ -131,4 +133,11 @@ class DugHelp {
 		void createQueryHeader();
 		void stringToDec();	  // converting the hostname to qname (length/data pair)
 		void createQueryQuestion();
+		void turnOnLogger() {
+			logger->setLogger(true);
+		}
+		void log(std::string str) {
+			logger->printLog (str);
+		}
+		int hexToDec(char hex[]);
 };

@@ -207,15 +207,6 @@ int DugHelp::getPacket () {
 			exit(-1);
 	}
 
-  /*
-   Each octect is one char in the buf
-	 Type is 2 octets aka 2 char
-	  	interpret type 0x0001 (A record)
-	 Class is 2 octets aka 2 char
-	 TTL is 4 octets aka 4 char
-   RDLength is 2 octets aka 2 char
-	*/
-
 	 int endPosition = 0;
 	 int loc = 0;
 	 std::string id = "0x";
@@ -386,6 +377,5 @@ int DugHelp::getPacket () {
 	 if (ans_type == "0x0001") {
 		 std::cout << "Authoritative Answer: " << ip_addr << std::endl;
 	 }
-
 
 }

@@ -165,7 +165,7 @@ void DugHelp::setupAddress ()
 }
 
 void DugHelp::sendPacket () {
-	int bytesSent = sizeof(struct DNS_Header) + qnameSize + 6;
+	bytesSent = sizeof(struct DNS_Header) + qnameSize + 6;
 	unsigned char message[bytesSent];
 	memset(message, 0, bytesSent);
 	memcpy(message, buf, bytesSent);
@@ -182,26 +182,35 @@ int DugHelp::getPacket () {
 			logger->printLog("Error reading data");
 			exit(-1);
 	}
-	std::cout << "HERE" << std::endl;
-	// Testing the buf to see if any data was returned
-	int count = 0;
-	for (int i = 0; i < 100; i++) {
+	std::cout << "DNS Response: .... " << std::endl;
+	// Getting the name from the response; same size as the bytes sent in the
+	// query question
+	int nine_octets = 18;
+	int two_octets = 2;
+	int eighteen_octetes = 36;
+	unsigned char name[bytesSent];
+	unsigned char qname[nine_octets];
+	unsigned char type[two_octets];
+	unsigned char r_class[two_octets];
+	unsigned char ttl[eighteen_octetes];
+	unsigned char rdlength[two_octets];
+
+	memcpy(name, buf, bytesSent);
+	memcpy(qname, buf + bytesSent, nine_octets);
+	memcpy(type, buf + bytesSent + nine_octets, two_octets);
+	memcpy(r_class, buf + bytesSent + nine_octets + two_octets, two_octets);
+	memcpy(ttl, buf + bytesSent + nine_octets + two_octets + two_octets, eighteen_octetes);
+	memcpy(rdlength, buf + bytesSent + nine_octets + two_octets + two_octets + eighteen_octetes, two_octets);
+
+
+	// for (int i = 0; i < two_octets; i++) {
+	// 	std::cout << rdlength[i];
+	// }
+	// std::cout << std::endl;
+
+	for (int i = 0; i < 2000; i++){
 		std::cout << buf[i];
-		count ++;
 	}
 	std::cout << std::endl;
-
-	/*
-	std::cout << "WHY" << std::endl;
-	std::cout << std::endl;
-	std::cout << dnsAnswer->name << std::endl;
-
-	std::cout << dnsAnswer->types.type << std::endl;
-	std::cout << dnsAnswer->types._class << std::endl;
-	std::cout << dnsAnswer->types.ttl << std::endl;
-	std::cout << dnsAnswer->types.len << std::endl;
-	std::cout << dnsAnswer->data << std::endl;
-  	*/
-
 	return 0;
 }

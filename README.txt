@@ -13,3 +13,6 @@ Sending the request:
 	- Build the DNS message
 	
 	- Send DNS messges as the body of a UDP request
+
+I have tried to implement the daemonization. 
+

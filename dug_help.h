@@ -109,6 +109,7 @@ class DugHelp {
 		unsigned char buf[2000], *reader;
 		unsigned char qname[255];
 		int qnameSize = 0;
+		int bytesSent = 0;
 
 	public:
 		/*************************************************************************
